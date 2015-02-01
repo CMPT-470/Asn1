@@ -20,9 +20,14 @@
 package org.gjt.sp.jedit.gui;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
+
 import java.awt.*;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.gui.AboutDialog.AboutPanel.AnimationThread;
 import org.gjt.sp.util.Log;
 
 /**
@@ -44,7 +49,19 @@ public class SplashScreen extends JComponent
 			getClass().getResource("/org/gjt/sp/jedit/icons/splash.png"));
 		MediaTracker tracker = new MediaTracker(this);
 		tracker.addImage(image,0);
+		
+		text = new Vector(50);
+		String line = "Taylor Wiebe, tnw979@usask.ca";
+		String line2 = "Yacine Boulfiza, yab212@mail.usask.ca";
+		text.addElement(line);
+		text.addElement(line2);
+		maxWidth = Math.max(maxWidth,
+			fm.stringWidth(line) + 20);
 
+		scrollPosition = -210;
+
+		thread = new AnimationThread();
+		
 		try
 		{
 			tracker.waitForAll();
@@ -70,6 +87,7 @@ public class SplashScreen extends JComponent
 			(screen.height - size.height) / 2);
 		win.validate();
 		win.setVisible(true);
+		
 	}
 
 	public void dispose()
@@ -154,14 +172,108 @@ public class SplashScreen extends JComponent
 							      + fm.getAscent() + fm.getDescent()) / 2);
 		}
 
-
 		String version = jEdit.getVersion();
 		g.drawString(version,
 			getWidth() - fm.stringWidth(version) - 2,
 			image.getHeight(this) - fm.getDescent());
+		
+		int height = fm.getHeight();
+		int firstLine = scrollPosition / height;
+
+		int firstLineOffset = 100;
+		//int firstLineOffset = height - scrollPosition % height;
+		int lines = (getHeight() - TOP - BOTTOM) / height;
+		
+
+		int y = firstLineOffset;
+
+		for(int i = 0; i <= lines; i++)
+		{
+			if(i + firstLine >= 0 && i + firstLine < text.size())
+			{
+				String line = (String)text.get(i + firstLine);
+				g.drawString(line,20,y);
+
+				//g.drawString(line,(maxWidth - fm.stringWidth(line))/2,y);
+			}
+			y += fm.getHeight();
+		}
 		notify();
 	}
 
+/*
+	public Dimension getPreferredSize()
+	{
+		return new Dimension(1 + image.getIconWidth(),
+			1 + image.getIconHeight());
+	}*/
+
+	public void addNotify()
+	{
+		super.addNotify();
+		thread.start();
+	}
+
+	public void removeNotify()
+	{
+		super.removeNotify();
+		thread.kill();
+	}
+
+	class AnimationThread extends Thread
+	{
+		private boolean running = true;
+		private long last;
+
+		AnimationThread()
+		{
+			super("Scroll box animation thread");
+			setPriority(Thread.MIN_PRIORITY);
+		}
+		
+		public void kill()
+		{
+			running = false;
+		}
+
+		public void run()
+		{
+			FontMetrics fm = getFontMetrics(getFont());
+			int max = (text.size() * fm.getHeight());
+
+			while (running)
+			{
+				scrollPosition += 10;
+
+				if(scrollPosition > max)
+					scrollPosition = -250;
+
+				if(last != 0)
+				{
+					long frameDelay =
+						System.currentTimeMillis()
+						- last;
+
+					try
+					{
+						Thread.sleep(
+							75
+							- frameDelay);
+					}
+					catch(Exception e)
+					{
+					}
+				}
+
+				last = System.currentTimeMillis();
+
+				repaint(getWidth() / 2 - maxWidth,
+					TOP,maxWidth * 2,
+					getHeight() - TOP - BOTTOM);
+			}
+		}
+	}
+	
 	// private members
 	private final FontMetrics fm;
 	private final JWindow win;
@@ -172,4 +284,12 @@ public class SplashScreen extends JComponent
 	private String label;
 	private String lastLabel;
 	private long lastAdvanceTime = System.currentTimeMillis();
+	
+	//new
+	Vector text;
+	int maxWidth;
+	int scrollPosition;
+	AnimationThread thread;
+	public static int TOP = 120;
+	public static int BOTTOM = 30;
 }
