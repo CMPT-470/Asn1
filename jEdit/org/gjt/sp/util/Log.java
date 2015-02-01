@@ -23,9 +23,12 @@
 package org.gjt.sp.util;
 
 import java.io.*;
+import java.sql.Timestamp;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
+
 
 /**
  * This class provides methods for logging events. In terms of functionality,
@@ -354,7 +357,8 @@ public class Log
 	//{{{ _log() method
 	private static void _log(int urgency, String source, String message)
 	{
-		String fullMessage = '[' + urgencyToString(urgency) + "] " + source
+		java.util.Date timestamp= new java.util.Date();
+		String fullMessage = "Timestamp: " + new Timestamp(timestamp.getTime()) + " "+ '[' + urgencyToString(urgency) + "] " + source
 			+ ": " + message;
 
 		try
