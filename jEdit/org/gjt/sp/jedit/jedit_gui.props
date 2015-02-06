@@ -473,6 +473,9 @@ view=new-view \
      new-plain-view \
      close-view \
      - \
+     zoom-in \
+     zoom-out \
+     - \
      prev-buffer \
      next-buffer \
      recent-buffer \
@@ -883,7 +886,7 @@ about.text=jEdit is brought to you by\n\
 	Ben Williams\n\
 	Bertalan Fodor\n\
 	Bill McMilleon\n\
-	Björn "Vampire" Kautler\n\
+	Bjï¿½rn "Vampire" Kautler\n\
 	Brad Mace\n\
 	Brant Langer Gurganus\n\
 	Brett Smith\n\

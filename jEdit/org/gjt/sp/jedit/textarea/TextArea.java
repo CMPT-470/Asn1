@@ -23,6 +23,7 @@
  */
 package org.gjt.sp.jedit.textarea;
 
+import org.gjt.sp.jedit.gui.FontSelector;
 import org.gjt.sp.jedit.input.InputHandlerProvider;
 import org.gjt.sp.jedit.input.AbstractInputHandler;
 import org.gjt.sp.jedit.input.DefaultInputHandlerProvider;
@@ -34,6 +35,7 @@ import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.Debug;
 import org.gjt.sp.jedit.TextUtilities;
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.StandardUtilities;
 
@@ -45,6 +47,7 @@ import javax.swing.text.Segment;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.plaf.metal.MetalLookAndFeel;
+
 import java.awt.*;
 import java.awt.im.InputMethodRequests;
 import java.awt.event.*;
@@ -64,6 +67,8 @@ import java.util.*;
  */
 public class TextArea extends JComponent
 {
+	public static FontSelector font;
+	
 	//{{{ TextArea constructor
 	public TextArea()
 	{
@@ -121,7 +126,40 @@ public class TextArea extends JComponent
 		buffer.insert(0,"ahaha coucou\ncaca");
 		setBuffer(buffer);
 	} //}}}
+	
+	//{{{ increaseFont() method
+	public void increaseFont()
+	{
+	
+		font = new FontSelector(jEdit.getFontProperty("view.font"));
+		int newSize = font.getFont().getSize() + 5;
+		Font newFont = new Font(font.getName(), Font.PLAIN, newSize);
+		
+		jEdit.setFontProperty("view.font",newFont);
+		painter.setFont(newFont);
+		font.setFont(newFont);
+		jEdit.propertiesChanged();
 
+		jEdit.saveSettings();	
+	}
+	//}}}
+	
+	//{{{ decreaseFont() method
+		public void decreaseFont()
+		{
+		
+			font = new FontSelector(jEdit.getFontProperty("view.font"));
+			int newSize = font.getFont().getSize() - 5;
+			Font newFont = new Font(font.getName(), Font.PLAIN, newSize);
+			
+			jEdit.setFontProperty("view.font",newFont);
+			painter.setFont(newFont);
+			font.setFont(newFont);
+			jEdit.propertiesChanged();
+			jEdit.saveSettings();	
+		}
+		//}}}
+	
 	//{{{ TextArea constructor
 	/**
 	 * Creates a new JEditTextArea.
