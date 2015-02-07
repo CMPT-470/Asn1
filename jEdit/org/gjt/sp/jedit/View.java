@@ -383,7 +383,9 @@ public class View extends JFrame implements EBComponent, InputHandlerProvider
 
 		if(word)
 		{
+			
 			String text = textArea.getSelectedText();
+			
 			if(text == null)
 			{
 				textArea.selectWord();
@@ -391,13 +393,14 @@ public class View extends JFrame implements EBComponent, InputHandlerProvider
 			}
 			else if(text.indexOf('\n') != -1)
 				text = null;
+				
 
 			if(text != null && SearchAndReplace.getRegexp())
 				text = SearchAndReplace.escapeRegexp(text,false);
 
 			searchBar.getField().setText(text);
 		}
-
+		
 		searchBar.getField().requestFocus();
 		searchBar.getField().selectAll();
 	} //}}}

@@ -2131,7 +2131,57 @@ public class jEdit
 		}
 		System.err.println(System.currentTimeMillis() - time);
 	} */
+	
+	//{{{ newViewAndBuffer() method
+	/**
+	 * Creates a new view and buffer.
+	 * @param view An existing view
+	 * @since jEdit 3.2pre2
+	 */
+	public static View newViewAndBuffer(View view)
+	{
+		String path = view.getBuffer().getDirectory();
+		Hashtable props = new Hashtable();
+		Buffer newBuffer;
+		
+		
+		synchronized (editBusOrderingLock)
+		{
+			synchronized(bufferListLock)
+			{
+				Buffer buffer = getBuffer(path);
 
+				BufferHistory.Entry entry = BufferHistory.getEntry(path);
+
+				if(entry != null && saveCaret && props.get(Buffer.CARET) == null)
+				{
+					props.put(Buffer.CARET, entry.caret);
+				}
+
+				if(entry != null && props.get(JEditBuffer.ENCODING) == null)
+				{
+					if(entry.encoding != null)
+						props.put(JEditBuffer.ENCODING,entry.encoding);
+				}
+
+				newBuffer = new Buffer(path, true, false, props);
+
+				if(!newBuffer.load(view,false))
+					return null;
+
+				addBufferToList(newBuffer);
+			}
+
+			EditBus.send(new BufferUpdate(newBuffer,view,BufferUpdate.CREATED));
+		}
+		
+		View newViewAndBuffer = newView(view,null,false);
+		newViewAndBuffer.setBuffer(newBuffer);
+		return newViewAndBuffer;
+	} //}}}
+
+	//{{{ newView() method
+	
 	//{{{ newView() method
 	/**
 	 * Creates a new view.
