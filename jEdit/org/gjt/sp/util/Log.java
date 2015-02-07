@@ -357,7 +357,7 @@ public class Log
 	//{{{ _log() method
 	private static void _log(int urgency, String source, String message)
 	{
-		java.util.Date timestamp= new java.util.Date();
+		Date timestamp= new Date();
 		String fullMessage = "Timestamp: " + new Timestamp(timestamp.getTime()) + " "+ '[' + urgencyToString(urgency) + "] " + source
 			+ ": " + message;
 
