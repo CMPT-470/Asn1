@@ -331,7 +331,7 @@ public class HistoryTextField extends JTextField
 	private boolean enterAddsToHistory;
 	private boolean selectAllOnFocus;
 	//}}}
-
+	
 	//}}}
 
 	//{{{ Inner classes

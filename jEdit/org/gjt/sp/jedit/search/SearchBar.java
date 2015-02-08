@@ -43,18 +43,22 @@ public class SearchBar extends JPanel
 	//{{{ SearchBar constructor
 	public SearchBar(final View view, boolean temp)
 	{
-		setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+		
+		boxSearch = new Box(BoxLayout.X_AXIS);
 
 		this.view = view;
 
-		add(Box.createHorizontalStrut(2));
+		boxSearch.add(Box.createHorizontalStrut(2));
 
 		JLabel label = new JLabel(jEdit.getProperty("view.search.find"));
-		add(label);
-		add(Box.createHorizontalStrut(12));
-		add(find = new HistoryTextField("find"));
+		boxSearch.add(label);
+		boxSearch.add(Box.createHorizontalStrut(12));
+		boxSearch.add(find = new HistoryTextField("find"));
 		find.setSelectAllOnFocus(true);
+	    
 
+        
         SyntaxStyle style = GUIUtilities.parseStyle(jEdit.getProperty("view.style.invalid"), "Dialog", 12);
         errorBackground = style.getBackgroundColor();
         errorForeground = style.getForegroundColor();
@@ -70,24 +74,49 @@ public class SearchBar extends JPanel
 
 		Insets margin = new Insets(1,1,1,1);
 
-		add(Box.createHorizontalStrut(12));
-		add(ignoreCase = new JCheckBox(jEdit.getProperty(
+		boxSearch.add(Box.createHorizontalStrut(12));
+		boxSearch.add(ignoreCase = new JCheckBox(jEdit.getProperty(
 			"search.case")));
 		ignoreCase.addActionListener(actionHandler);
 		ignoreCase.setMargin(margin);
 		ignoreCase.setRequestFocusEnabled(false);
-		add(Box.createHorizontalStrut(2));
-		add(regexp = new JCheckBox(jEdit.getProperty(
+		boxSearch.add(Box.createHorizontalStrut(2));
+		boxSearch.add(regexp = new JCheckBox(jEdit.getProperty(
 			"search.regexp")));
 		regexp.addActionListener(actionHandler);
 		regexp.setMargin(margin);
 		regexp.setRequestFocusEnabled(false);
-		add(Box.createHorizontalStrut(2));
-		add(hyperSearch = new JCheckBox(jEdit.getProperty(
+		boxSearch.add(Box.createHorizontalStrut(2));
+		boxSearch.add(hyperSearch = new JCheckBox(jEdit.getProperty(
 			"search.hypersearch")));
 		hyperSearch.addActionListener(actionHandler);
 		hyperSearch.setMargin(margin);
 		hyperSearch.setRequestFocusEnabled(false);
+		
+		
+		// MyCode
+		//add(Box.createVerticalGlue());
+		boxList = new Box(BoxLayout.X_AXIS);
+		
+		boxList.add(Box.createHorizontalStrut(2));
+		
+		JLabel labelList = new JLabel("Search list: ");
+		boxList.add(labelList);
+		
+	    listModel = new DefaultListModel();
+        list = new JList(listModel);
+        listScrollPane = new JScrollPane(list);
+        boxList.add(listScrollPane);
+        
+        historyModel = find.getModel();
+        
+        add(boxSearch);
+        add(boxList);
+        
+        getSearchListHistory();
+        
+        // End MyCode
+		
 
 		update();
 
@@ -117,6 +146,47 @@ public class SearchBar extends JPanel
 
 		propertiesChanged();
 	} //}}}
+	
+	
+	// MyCode
+	public void getSearchListHistory(){
+		int size = historyModel.getSize();
+		
+		for (int i = 0; i < size; i++){
+			listModel.addElement(historyModel.elementAt(i));
+			if (i == 4)
+				break;
+		}
+	}
+	
+	public void addToSearchListHistory(String text){
+		int indexInList = indexInSearchList(text);
+		
+		if (indexInList != -1){
+			listModel.removeElementAt(indexInList);
+		} else {
+			listModel.removeElementAt(listModel.size() - 1);
+		}
+		
+		listModel.add(0, text);
+	}
+	
+	public int indexInSearchList(String text){
+		
+		int index = -1;
+		
+		for (int i = 0; i< listModel.getSize(); i++){
+			String item = listModel.getElementAt(i).toString();
+			if (item.equals(text)){
+				index = i;
+				break;
+			}
+		}
+		
+		return index;
+	}
+	
+	// End MyCode
 
 	//{{{ getField() method
 	public HistoryTextField getField()
@@ -176,6 +246,15 @@ public class SearchBar extends JPanel
 	private int searchStart;
 	private boolean searchReverse;
 	private boolean temp;
+	
+	// MyCode
+	private JList list;
+	private DefaultListModel listModel;
+	private JScrollPane listScrollPane;
+	private HistoryModel historyModel;
+	private Box boxSearch;
+	private Box boxList;
+	// End MyCode
 	//}}}
 
 	//{{{ find() method
@@ -208,6 +287,10 @@ public class SearchBar extends JPanel
 		//{{{ Incremental search
 		else
 		{
+			// MyCode
+			addToSearchListHistory(text);
+			// End MyCode
+			
 			if(reverse && SearchAndReplace.getRegexp())
 			{
 				GUIUtilities.error(view,"regexp-reverse",null);
